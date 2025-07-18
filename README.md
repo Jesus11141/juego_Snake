@@ -12,13 +12,6 @@ Este juego de Snake incluye características especiales como:
 - Serpientes enemigas en modo difícil
 - Controles táctiles intuitivos
 
-## Descargar APK
-
-La APK del juego está disponible para descargar en el siguiente enlace:
-
-[Descargar APK del Juego Snake](https://drive.google.com/file/d/XXXXX)
-
-*Nota: Reemplaza el enlace anterior con la URL real donde esté alojada la APK.*
 
 ## Cómo jugar
 
