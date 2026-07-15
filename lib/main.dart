@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
@@ -70,6 +71,7 @@ class _GameScreenState extends State<GameScreen> {
   bool bonusMode = false;
   String difficulty = 'medio';
   bool showMenu = true;
+  final FocusNode _focusNode = FocusNode();
   
   Map<String, int> speeds = {
     'facil': 300,
@@ -84,6 +86,22 @@ class _GameScreenState extends State<GameScreen> {
   void initState() {
     super.initState();
     generateFood();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  void _handleKey(KeyEvent event) {
+    if (event is KeyDownEvent && gameRunning) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowUp && direction != 'down')
+        setState(() => direction = 'up');
+      else if (event.logicalKey == LogicalKeyboardKey.arrowDown && direction != 'up')
+        setState(() => direction = 'down');
+      else if (event.logicalKey == LogicalKeyboardKey.arrowLeft && direction != 'right')
+        setState(() => direction = 'left');
+      else if (event.logicalKey == LogicalKeyboardKey.arrowRight && direction != 'left')
+        setState(() => direction = 'right');
+    }
   }
   
   void selectDifficulty(String diff) {
@@ -522,19 +540,20 @@ class _GameScreenState extends State<GameScreen> {
     }
     
     return Scaffold(
-      body: GestureDetector(
-        onPanUpdate: (details) {
-          if (!gameRunning) return;
-          
-          double dx = details.delta.dx;
-          double dy = details.delta.dy;
-          
-          if (dx.abs() > dy.abs()) {
-            setState(() => direction = dx > 0 ? 'right' : 'left');
-          } else {
-            setState(() => direction = dy > 0 ? 'down' : 'up');
-          }
-        },
+      body: KeyboardListener(
+        focusNode: _focusNode,
+        onKeyEvent: _handleKey,
+        child: GestureDetector(
+          onPanUpdate: (details) {
+            if (!gameRunning) return;
+            double dx = details.delta.dx;
+            double dy = details.delta.dy;
+            if (dx.abs() > dy.abs()) {
+              setState(() => direction = dx > 0 ? 'right' : 'left');
+            } else {
+              setState(() => direction = dy > 0 ? 'down' : 'up');
+            }
+          },
         child: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -673,6 +692,11 @@ class _GameScreenState extends State<GameScreen> {
                     padding: EdgeInsets.all(20),
                     child: Column(
                       children: [
+                        Text(
+                          '⌨️ Flechas del teclado o botones',
+                          style: TextStyle(color: Colors.white60, fontSize: 12),
+                        ),
+                        SizedBox(height: 8),
                         _buildControlButton('up', Icons.keyboard_arrow_up),
                         SizedBox(height: 12),
                         Row(
@@ -691,6 +715,7 @@ class _GameScreenState extends State<GameScreen> {
               ],
             ),
           ),
+        ),
         ),
       ),
     );
@@ -733,6 +758,7 @@ class _GameScreenState extends State<GameScreen> {
     bonusTimer?.cancel();
     itemTimer?.cancel();
     enemyTimer?.cancel();
+    _focusNode.dispose();
     super.dispose();
   }
 }
