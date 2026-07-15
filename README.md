@@ -1,6 +1,6 @@
-# Juego de Snake
+# Juego de Snake UNIBE
 
-Un juego de Snake desarrollado con Flutter, diseñado especialmente para niños.
+Un juego de Snake desarrollado con Flutter, personalizado para la Universidad Iberoamericana del Ecuador (UNIBE).
 
 ## Descripción
 
@@ -11,6 +11,7 @@ Este juego de Snake incluye características especiales como:
 - Modo bonus con estrellas
 - Serpientes enemigas en modo difícil
 - Controles táctiles intuitivos
+- Diseño con los colores institucionales de la UNIBE (azul y rojo)
 
 
 ## Cómo jugar
@@ -23,4 +24,4 @@ Este juego de Snake incluye características especiales como:
 
 ## Desarrollado por
 
-Creado por Raul para su hijo Jacob.
+Proyecto personalizado para la Universidad Iberoamericana del Ecuador (UNIBE).

@@ -39,9 +39,9 @@ class SnakeGame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Juego de Jacob',
+      title: 'Juego UNIBE',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.blue,
         fontFamily: 'Arial',
       ),
       home: GameScreen(),
@@ -56,7 +56,8 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  static const int boardSize = 20;
+  static const int boardCols = 20;
+  int boardRows = 20;
   List<Offset> snake = [Offset(10, 10)];
   List<FoodItem> foods = [];
   List<StarItem> stars = [];
@@ -74,9 +75,9 @@ class _GameScreenState extends State<GameScreen> {
   final FocusNode _focusNode = FocusNode();
   
   Map<String, int> speeds = {
-    'facil': 300,
-    'medio': 200,
-    'dificil': 120,
+    'facil': 180,
+    'medio': 130,
+    'dificil': 80,
   };
   
   List<String> fruitTypes = ['🍎', '🍊', '🍌', '🍇', '🍓', '🥝'];
@@ -184,22 +185,21 @@ class _GameScreenState extends State<GameScreen> {
     if (difficulty != 'dificil' || bonusMode) return;
     
     Random random = Random();
-    Offset startPos = Offset(0, 0); // Inicializar
+    Offset startPos = Offset(0, 0);
     
-    // Generar en los bordes del mapa
     int side = random.nextInt(4);
     switch (side) {
-      case 0: // Arriba
-        startPos = Offset(random.nextInt(boardSize).toDouble(), 0);
+      case 0:
+        startPos = Offset(random.nextInt(boardCols).toDouble(), 0);
         break;
-      case 1: // Abajo
-        startPos = Offset(random.nextInt(boardSize).toDouble(), boardSize - 1);
+      case 1:
+        startPos = Offset(random.nextInt(boardCols).toDouble(), boardRows - 1);
         break;
-      case 2: // Izquierda
-        startPos = Offset(0, random.nextInt(boardSize).toDouble());
+      case 2:
+        startPos = Offset(0, random.nextInt(boardRows).toDouble());
         break;
-      case 3: // Derecha
-        startPos = Offset(boardSize - 1, random.nextInt(boardSize).toDouble());
+      case 3:
+        startPos = Offset(boardCols - 1, random.nextInt(boardRows).toDouble());
         break;
     }
     
@@ -241,9 +241,9 @@ class _GameScreenState extends State<GameScreen> {
       }
       
       // Verificar límites
-      if (newHead.dx < 0 || newHead.dx >= boardSize || 
-          newHead.dy < 0 || newHead.dy >= boardSize) {
-        continue; // No mover si está fuera de límites
+      if (newHead.dx < 0 || newHead.dx >= boardCols || 
+          newHead.dy < 0 || newHead.dy >= boardRows) {
+        continue;
       }
       
       enemy.body.insert(0, newHead);
@@ -284,8 +284,8 @@ class _GameScreenState extends State<GameScreen> {
     Offset pos;
     do {
       pos = Offset(
-        random.nextInt(boardSize - 2).toDouble() + 1, // Evitar bordes
-        random.nextInt(boardSize - 2).toDouble() + 1, // Evitar bordes
+        random.nextInt(boardCols - 2).toDouble() + 1,
+        random.nextInt(boardRows - 2).toDouble() + 1,
       );
     } while (snake.contains(pos) || 
              foods.any((f) => f.position == pos) ||
@@ -354,20 +354,19 @@ class _GameScreenState extends State<GameScreen> {
       }
 
       if (difficulty == 'dificil') {
-        if (newHead.dx < 0 || newHead.dx >= boardSize || 
-            newHead.dy < 0 || newHead.dy >= boardSize) {
+        if (newHead.dx < 0 || newHead.dx >= boardCols || 
+            newHead.dy < 0 || newHead.dy >= boardRows) {
           gameOver();
           return;
         }
       } else {
-        // Atravesar paredes al lado exactamente opuesto
         if (newHead.dx < 0) {
-          newHead = Offset(boardSize - 1, newHead.dy);
-        } else if (newHead.dx >= boardSize) {
+          newHead = Offset(boardCols - 1, newHead.dy);
+        } else if (newHead.dx >= boardCols) {
           newHead = Offset(0, newHead.dy);
         } else if (newHead.dy < 0) {
-          newHead = Offset(newHead.dx, boardSize - 1);
-        } else if (newHead.dy >= boardSize) {
+          newHead = Offset(newHead.dx, boardRows - 1);
+        } else if (newHead.dy >= boardRows) {
           newHead = Offset(newHead.dx, 0);
         }
       }
@@ -476,8 +475,13 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/unibe_logo.jpg'),
+            fit: BoxFit.cover,
+            opacity: 0.3,
+          ),
           gradient: LinearGradient(
-            colors: [Colors.blue.shade900, Colors.blue.shade700, Colors.purple.shade500],
+            colors: [Colors.blue.shade900, Colors.blue.shade700, Colors.red.shade600],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -487,7 +491,7 @@ class _GameScreenState extends State<GameScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Juego de Jacob\n🐍',
+                'Juego UNIBE\n🐍',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.white,
@@ -533,12 +537,88 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
+  Widget _buildGameBoard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: bonusMode ? Colors.yellow.withOpacity(0.6) : Colors.white.withOpacity(0.3),
+          width: 3,
+        ),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: Offset(0, 5)),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(17),
+        child: CustomPaint(
+          painter: GamePainter(snake, foods, stars, enemies, (rows) {
+                          if (rows != boardRows) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) setState(() => boardRows = rows);
+                            });
+                          }
+                        }),
+          size: Size.infinite,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildControls(bool isWeb) {
+    final btnSize = isWeb ? 70.0 : 80.0;
+    final iconSize = isWeb ? 32.0 : 36.0;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isWeb)
+          Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text('⌨️ Flechas o botones', style: TextStyle(color: Colors.white60, fontSize: 13)),
+          ),
+        _buildControlButton('up', Icons.keyboard_arrow_up, btnSize, iconSize),
+        SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildControlButton('left', Icons.keyboard_arrow_left, btnSize, iconSize),
+            SizedBox(width: isWeb ? 20 : 40),
+            _buildControlButton('right', Icons.keyboard_arrow_right, btnSize, iconSize),
+          ],
+        ),
+        SizedBox(height: 8),
+        _buildControlButton('down', Icons.keyboard_arrow_down, btnSize, iconSize),
+      ],
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        Text(
+          'Juego UNIBE\nUniversidad Iberoamericana del Ecuador',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold,
+            shadows: [Shadow(color: Colors.black.withOpacity(0.5), offset: Offset(2, 2), blurRadius: 4)],
+          ),
+        ),
+        if (bonusMode) ...[
+          Text('✨ BONUS UNIBE! ✨', style: TextStyle(color: Colors.yellow, fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('INMUNE + VELOCIDAD (15s)', style: TextStyle(color: Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (showMenu) {
-      return _buildDifficultyMenu();
-    }
-    
+    if (showMenu) return _buildDifficultyMenu();
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWeb = screenWidth > 700;
+
     return Scaffold(
       body: KeyboardListener(
         focusNode: _focusNode,
@@ -554,202 +634,139 @@ class _GameScreenState extends State<GameScreen> {
               setState(() => direction = dy > 0 ? 'down' : 'up');
             }
           },
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: bonusMode 
-                ? [Colors.orange.shade900, Colors.orange.shade700, Colors.yellow.shade500]
-                : [Colors.green.shade900, Colors.green.shade700, Colors.green.shade500],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/unibe_logo.jpg'),
+                fit: BoxFit.cover,
+                opacity: 0.2,
+              ),
+              gradient: LinearGradient(
+                colors: bonusMode
+                    ? [Colors.orange.shade900, Colors.orange.shade700, Colors.yellow.shade500]
+                    : [Colors.blue.shade900, Colors.blue.shade700, Colors.red.shade500],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
             ),
-            image: _hasBackgroundImage() ? DecorationImage(
-              image: AssetImage('assets/images/background.png'),
-              fit: BoxFit.cover,
-              opacity: 0.3, // Transparencia para ver el juego
-            ) : null,
+            child: SafeArea(
+              child: isWeb ? _buildWebLayout() : _buildMobileLayout(),
+            ),
           ),
-          child: SafeArea(
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWebLayout() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Padding(
+            padding: EdgeInsets.all(16),
             child: Column(
               children: [
-                Container(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Juego de Jacob\nCreado por su papá Raul',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black.withOpacity(0.5),
-                              offset: Offset(2, 2),
-                              blurRadius: 4,
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (bonusMode)
-                        Column(
-                          children: [
-                            Text(
-                              '✨ BONUS JACOB! ✨',
-                              style: TextStyle(
-                                color: Colors.yellow,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              'INMUNE + VELOCIDAD (15s)',
-                              style: TextStyle(
-                                color: Colors.orange,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    '🏆 Puntuación: $score',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    margin: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: bonusMode ? Colors.yellow.withOpacity(0.6) : Colors.white.withOpacity(0.3), 
-                        width: 3
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: Offset(0, 5),
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(17),
-                      child: CustomPaint(
-                        painter: GamePainter(snake, foods, stars, enemies),
-                        size: Size.infinite,
-                      ),
-                    ),
-                  ),
-                ),
-                if (!gameRunning)
-                  Column(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.all(16),
-                        child: ElevatedButton(
-                          onPressed: () => setState(() => showMenu = true),
-                          child: Text(
-                            '🎮 Cambiar Dificultad',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange.shade600,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            elevation: 8,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'Desliza en la pantalla para mover',
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
-                      ),
-                    ],
-                  ),
-                if (gameRunning)
-                  Container(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Text(
-                          '⌨️ Flechas del teclado o botones',
-                          style: TextStyle(color: Colors.white60, fontSize: 12),
-                        ),
-                        SizedBox(height: 8),
-                        _buildControlButton('up', Icons.keyboard_arrow_up),
-                        SizedBox(height: 12),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildControlButton('left', Icons.keyboard_arrow_left),
-                            SizedBox(width: 40),
-                            _buildControlButton('right', Icons.keyboard_arrow_right),
-                          ],
-                        ),
-                        SizedBox(height: 12),
-                        _buildControlButton('down', Icons.keyboard_arrow_down),
-                      ],
-                    ),
-                  ),
+                _buildHeader(),
+                SizedBox(height: 12),
+                _buildScoreWidget(),
+                SizedBox(height: 12),
+                Expanded(child: _buildGameBoard()),
+                if (!gameRunning) _buildChangeDifficultyButton(),
               ],
             ),
           ),
         ),
+        Container(
+          width: 220,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (gameRunning) _buildControls(true),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: _buildHeader(),
+        ),
+        _buildScoreWidget(),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: _buildGameBoard(),
+          ),
+        ),
+        if (!gameRunning) _buildChangeDifficultyButton(),
+        if (gameRunning)
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: _buildControls(false),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildScoreWidget() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.3)),
+      ),
+      child: Text(
+        '🏆 Puntuación: $score',
+        style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildChangeDifficultyButton() {
+    return Container(
+      margin: EdgeInsets.all(16),
+      child: ElevatedButton(
+        onPressed: () => setState(() => showMenu = true),
+        child: Text('🎮 Cambiar Dificultad', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange.shade600,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          elevation: 8,
         ),
       ),
     );
   }
 
-  Widget _buildControlButton(String dir, IconData icon) {
+  Widget _buildControlButton(String dir, IconData icon, double size, double iconSize) {
     return GestureDetector(
       onTap: () => setState(() => direction = dir),
       child: Container(
-        width: 80,
-        height: 80,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.green.shade400, Colors.green.shade600],
+            colors: [Colors.blue.shade400, Colors.blue.shade600],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(size / 2),
           boxShadow: [
-            BoxShadow(
-              color: Colors.green.withOpacity(0.3),
-              blurRadius: 8,
-              offset: Offset(0, 4),
-            ),
+            BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 8, offset: Offset(0, 4)),
           ],
         ),
-        child: Icon(icon, color: Colors.white, size: 36),
+        child: Icon(icon, color: Colors.white, size: iconSize),
       ),
     );
-  }
-
-  bool _hasBackgroundImage() {
-    // Cambiar a true cuando coloques tu imagen en assets/images/background.png
-    return false; // Cambiar a true para activar imagen de fondo
   }
 
   @override
@@ -768,12 +785,15 @@ class GamePainter extends CustomPainter {
   final List<FoodItem> foods;
   final List<StarItem> stars;
   final List<EnemySnake> enemies;
+  final Function(int) onRowsCalculated;
   
-  GamePainter(this.snake, this.foods, this.stars, this.enemies);
+  GamePainter(this.snake, this.foods, this.stars, this.enemies, this.onRowsCalculated);
   
   @override
   void paint(Canvas canvas, Size size) {
     final cellSize = size.width / 20;
+    final rows = (size.height / cellSize).ceil();
+    onRowsCalculated(rows);
     
     // Dibujar estrellas
     for (var star in stars) {
